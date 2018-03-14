@@ -8,18 +8,6 @@ from astropy.io import ascii
 from smpy.smpy import LoadEAZYFilters, FilterSet
 import time
 
-def compute_flux_density(temp_sed, filt):
-	lam_s = temp_sed["lambda"]/(1+z)
-	spec = temp_sed.tempflux*(1+z)
-	lam_f = filt.wave.value
-	res_f = filt.response
-
-	res_intp  = np.interp(lam_s,lam_f,res_f)        #Interpolate to common wavelength axis
-	I1 = simps(spec*res_intp*lam_s,lam_s)
-	I2 = simps(res_intp/lam_s,lam_s)
-	fnu = I1/I2/ c_AAs
-	return fnu
-
 # CANDELS filter
 eazy_library = LoadEAZYFilters('FILTER.RES.CANDELS')
 filters = FilterSet()
@@ -30,7 +18,7 @@ c_AAs     = 2.99792458e18
 
 # EAZY output
 #EAZY_catalog = ascii.read("EAZY_uds-all_MC250.cat")
-EAZY_catalog = ascii.read("EAZY_uds-100_MC100.cat")
+#EAZY_catalog = ascii.read("EAZY_uds-100_MC100.cat")
 z_spec = EAZY_catalog["z_spec"]
 log_M = EAZY_catalog["log_M"]
 objid = EAZY_catalog["obj"]
@@ -43,19 +31,25 @@ lam_rf = [filt.lambda_c.value for filt in filters.filters]
 flux = np.zeros((len(z_spec),10))
 N_obj = objid.max()
 
+lams_s = np.empty((len(z_spec),1603))
+specs = np.empty((len(z_spec),1603))
+
 start = time.time()
 
 for d,z in enumerate(z_spec):
-
-	#obs_sed = ascii.read("./OUTPUT/%d.obs_sed"%(d+1)).to_pandas()
-	temp_sed = ascii.read("./OUTPUT/%d.temp_sed"%(d+1)).to_pandas()
-
-	flux[d] = [compute_flux_density(temp_sed,filt) for i,filt in enumerate(filters.filters)]
-	
-#	semilogy(obs_sed["lambda"]/(1+z),obs_sed.flux_cat*(1+z))
-#	semilogy(temp_sed["lambda"]/(1+z),temp_sed.tempflux*(1+z),ls="--")
-	
+	temp_sed = ascii.read("./OUTPUT/%d.temp_sed"%(d+1))
+	lams_s[d] = temp_sed["lambda"]/(1+z)
+	specs[d] = temp_sed["tempflux"]*(1+z)
 	if mod(d,N_obj)==0: print "N Monte-Carlo: %d"%(d/N_obj+1)
+
+for i,filt in enumerate(filters.filters):
+	lam_f = filt.wave.value
+        res_f = filt.response
+	res_intp  = np.interp(lams_s,lam_f,res_f)
+	I1 = simps(specs*res_intp*lams_s,lams_s,axis=1)
+        I2 = simps(res_intp/lams_s,lams_s,axis=1)
+        fnu = I1/I2/ c_AAs
+	flux[:,i] = fnu
 
 end = time.time()
 
@@ -68,5 +62,5 @@ df_flux.insert(2,"run",run)
 df_flux["z_spec"] = z_spec
 df_flux["log_M"] = log_M
 
-df_flux.to_csv("run_uds-100_MC100.flux",sep=" ",index=False)
-#df_flux.to_csv("run_uds-all_MC250.flux",sep=" ",index=False)
+#df_flux.to_csv("run_uds-100_MC100.beta.flux",sep=" ",index=False)
+#df_flux.to_csv("run_uds-all_MC250.beta.flux",sep=" ",index=False)
