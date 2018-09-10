@@ -135,7 +135,7 @@ for i, (meta,c) in enumerate(zip(Meta, Colors)):
                             c=np.log10(Ages/u.Gyr),
                             cmap='jet', s=40, alpha=0.9)
 C_SED0 = np.linspace(-1, 2, 100)
-plt.plot(C_SED0,-2.28*C_SED0**2-0.8*C_SED0-8.41,'k')
+plt.plot(C_SED0,-1.95*C_SED0**2-0.82*C_SED0-8.32,'k')
 col = plt.colorbar(s)
 col.set_label(r'$\log_{10}(\rm{Age}/yr)$')
 plt.xlabel('$C_{SED} = 0.82(U-V)-0.57(V-J)$',fontsize=14)

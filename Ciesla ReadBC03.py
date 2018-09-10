@@ -15,17 +15,19 @@ import matplotlib.pyplot as plt
 # BC03 .4color Aldo SFH
 #==============================================================================
 # FAST
-lgAges = np.log10(np.linspace(0.5,13.0,26)* 1e9)
-M_seed = np.logspace(6.0, 10.0, 5)
+lgAges = np.log10(np.linspace(0.5,11.5,111)* 1e9)
+#M_seed = np.logspace(6.0, 10.0, 5)
+M_seed = 10**np.linspace(5., 7., 5)
+
 
 lgMs = np.array([])
 lgSSFR = np.array([])
 lgT = np.array([])
 M_class = np.array([])
 
-dir = glob.glob('Ciesla/*.4color') 
-values = [(f, re.findall(r'-?\d+\.?\d*e?-?\d*?',f)[0]) for f in dir]
-dtype = [('name', 'S40'), ('M', float)]
+dir = glob.glob('New/Ciesla/Ciesla_4color/M*.4color') 
+values = [(f, re.findall(r'-?\d+\.?\d*e?-?\d*?',f)[1]) for f in dir]
+dtype = [('name', 'S80'), ('M', float)]
 a = np.array(values, dtype=dtype) 
 filelist = np.sort(a, order='M')  
 
@@ -40,7 +42,6 @@ for f, m in filelist:
     lgms= np.log10(table['M*_tot'])
     lgsfr_interp = np.interp(lgAges, lgt, lgsfr)
     lgms_interp = np.interp(lgAges, lgt, lgms)
-    print 10**lgms_interp
     plt.plot(lgt,lgms)
     lgMs = np.append(lgMs, lgms_interp)
     lgSSFR = np.append(lgSSFR, lgsfr_interp-lgms_interp)
@@ -48,6 +49,6 @@ for f, m in filelist:
     M_class = np.append(M_class, [m for i in range(lgAges.size)])
 
 info = np.vstack((M_class, lgT, lgMs, lgSSFR)).T
-np.savetxt('Ciesla/CSP result.txt',info,fmt='%.7e',header='M_seed lgT lgM* lgsSFR')
+np.savetxt('New/Ciesla/CSP result.txt',info,fmt='%.7e',header='M_seed lgT lgM* lgsSFR')
 
     

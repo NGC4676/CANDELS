@@ -50,8 +50,8 @@ models_exp = CSP(bc03, age = Ages, sfh = SFH,
 #==============================================================================
 # Combine and Measure             
 #==============================================================================
-weight = np.concatenate((np.linspace(0.,0.8,9),np.linspace(0.9,1.0,6)))
-X_track,Y_track = np.empty((15,SFH.size)),np.empty((15,SFH.size))
+weight = np.concatenate((np.linspace(0.,0.1,11),np.linspace(0.2,1.0,9)))
+X_track,Y_track = np.empty((len(weight),SFH.size)),np.empty((len(weight),SFH.size))
 
 # A B C D
 SSP1, SSP2 = SSP_A, SSP_D
@@ -73,7 +73,7 @@ def Composite(SSP1, SSP2):
     X1, Y1 = V_J1, U_V1
     X2, Y2 = V_J2, U_V2
     for i, w in enumerate(weight):
-        combined = (1-w) * SSP1 + w * SSP2
+        combined = w * SSP1 + (1-w) * SSP2
         synphot = Observe(combined, filters, redshift=0.001)
 
         mags = synphot.AB[0]
@@ -86,21 +86,21 @@ def Composite(SSP1, SSP2):
         Y_track[i] = Y.ravel()
     return X_track, Y_track, X1, Y1, X2, Y2
  
-def PlotXY(X, Y, X1, Y1, X2, Y2):
-
-    for k, Av in enumerate(Dust):
-        s=plt.scatter(X, Y, s=60, c=np.log10(SFH/u.yr),cmap='summer',alpha=0.9)
-        plt.scatter(X1[0,:,:,k,0], Y1[0,:,:,k,0], s=60, label='A: 0.1 Gyr',
-                    marker='s',c=np.log10(SFH/u.yr),cmap='winter_r',alpha=0.7)
-        plt.scatter(X2[0,:,:,k,0], Y2[0,:,:,k,0], s=80, label='D: 10 Gyr',
-                    marker='p',c=np.log10(SFH/u.yr),cmap='autumn',alpha=0.7)
-    for j,tau in enumerate(SFH):
-        plt.plot(X_track[:,j],Y_track[:,j], 
-                 label=r'$\tau = ${0:.2f}'.format(tau),lw=2,ls='--',alpha=0.7)
-    return s     
-
+#def PlotXY(X, Y, X1, Y1, X2, Y2):
+#
+#    for k, Av in enumerate(Dust):
+#        s=plt.scatter(X, Y, s=60, c=np.log10(SFH/u.yr),cmap='summer',alpha=0.9)
+#        plt.scatter(X1[0,:,:,k,0], Y1[0,:,:,k,0], s=60, label='A: 0.1 Gyr',
+#                    marker='s',c=np.log10(SFH/u.yr),cmap='winter_r',alpha=0.7)
+#        plt.scatter(X2[0,:,:,k,0], Y2[0,:,:,k,0], s=80, label='D: 10 Gyr',
+#                    marker='p',c=np.log10(SFH/u.yr),cmap='autumn',alpha=0.7)
+#    for j,tau in enumerate(SFH):
+#        plt.plot(X_track[:,j],Y_track[:,j], 
+#                 label=r'$\tau = ${0:.2f}'.format(tau),lw=2,ls='--',alpha=0.7)
+#    return s     
+#
 #X_track, Y_track, X1, Y1, X2, Y2 = Composite(SSP_A, SSP_D)
-
+#
 #for i,w in enumerate(weight):
 #    plt.figure(figsize=(9,7))
 #    s = PlotXY(X_track[i],Y_track[i],X1,Y1,X2,Y2)
@@ -138,40 +138,48 @@ with sns.axes_style("ticks"):
     plt.plot(X[0,:,0,0,0], Y[0,:,0,0,0], c='m',lw=2, alpha=0.7)
     
     X_track, Y_track, X1, Y1, X2, Y2 = Composite(SSP_A, SSP_D)
-    plt.plot(X_track[:,0],Y_track[:,0],lw=2,ls=':',alpha=0.9)
+    plt.plot(X_track[:,0],Y_track[:,0],lw=1.5,ls='--',alpha=0.9)
     plt.scatter(X1[0,:,:,0,0], Y1[0,:,:,0,0], s=75, label='A: 0.1 Gyr',
                 marker='s',c='cyan',alpha=0.9)
-    plt.scatter(X_track[:,0][9:-1], Y_track[:,0][9:-1], s=50,
-                   marker='|',c='k',alpha=1.)
+    plt.scatter(X_track[:,0][10:-1], Y_track[:,0][10:-1], s=30,
+                   marker='+',c='k',alpha=0.5,zorder=3)
+    plt.scatter(X_track[:,0][1:10], Y_track[:,0][1:10], s=30,
+                marker='+',c='k',alpha=1.,zorder=3)
     
     X_track, Y_track, X1, Y1, X2, Y2 = Composite(SSP_B, SSP_C)
-    plt.plot(X_track[:,0],Y_track[:,0],lw=2,ls=':',alpha=0.9)
+    plt.plot(X_track[:,0],Y_track[:,0],lw=1.5,ls='--',alpha=0.9)
     plt.scatter(X1[0,:,:,0,0], Y1[0,:,:,0,0], s=75, label='B: 0.4 Gyr',
                 marker='D',c='blue',alpha=0.9)
-    plt.scatter(X_track[:,0][1:10:2], Y_track[:,0][1:10:2], s=50,
-                   marker='|',c='k',alpha=0.5)
+    plt.scatter(X_track[:,0][10:-1], Y_track[:,0][10:-1], s=30,
+                   marker='+',c='k',alpha=0.5,zorder=3)
+    plt.scatter(X_track[:,0][1:10], Y_track[:,0][1:10], s=30,
+                marker='+',c='k',alpha=1.,zorder=3)
     
     X_track, Y_track, X1, Y1, X2, Y2 = Composite(SSP_A, SSP_C)
-    plt.plot(X_track[:,0],Y_track[:,0],lw=2,ls=':',alpha=0.9)
+    plt.plot(X_track[:,0],Y_track[:,0],lw=1.5,ls='--',alpha=0.9)
     plt.scatter(X2[0,:,:,0,0], Y2[0,:,:,0,0], s=125, label='C: 4 Gyr',
                 marker='p',c='orange',alpha=0.9)
-    plt.scatter(X_track[:,0][9:-1], Y_track[:,0][9:-1], s=50,
-                   marker='|',c='k',alpha=1.)
+    plt.scatter(X_track[:,0][10:-1], Y_track[:,0][10:-1], s=30,
+                   marker='+',c='k',alpha=0.5,zorder=3)
+    plt.scatter(X_track[:,0][1:10], Y_track[:,0][1:10], s=30,
+                   marker='+',c='k',alpha=1.,zorder=3)
     
     X_track, Y_track, X1, Y1, X2, Y2 = Composite(SSP_B, SSP_D)
-    plt.plot(X_track[:,0],Y_track[:,0],lw=2,ls=':',alpha=0.9)
+    plt.plot(X_track[:,0],Y_track[:,0],lw=1.5,ls='--',alpha=0.9)
     plt.scatter(X2[0,:,:,0,0], Y2[0,:,:,0,0], s=125, label='D: 10 Gyr',
                     marker='H',c='red',alpha=0.9)
-    plt.scatter(X_track[:,0][1:10:2], Y_track[:,0][1:10:2], s=50,
-                   marker='|',c='k',alpha=0.5)
+    plt.scatter(X_track[:,0][10:-1], Y_track[:,0][10:-1], s=30,
+                   marker='+',c='k',alpha=0.5,zorder=3)
+    plt.scatter(X_track[:,0][1:10], Y_track[:,0][1:10], s=30,
+                   marker='+',c='k',alpha=1.,zorder=3)
 
-    plt.axhline(0.5,ls='--',color='k',alpha=0.7)
+    plt.axhline(0.5,ls=':',color='c',alpha=0.7)
     plt.legend(loc='best',fontsize=14,frameon=True,facecolor='w')
 
-    plt.scatter(1.,0.02,marker='|',s=100,c='k',alpha=0.5)
-    plt.text(1.1,0.,'[0.1,0.3,0.5,0.7,0.9]',alpha=0.5)
-    plt.scatter(1.,-0.08,marker='|',s=100,c='k',alpha=1.)
-    plt.text(1.1,-0.1,'[0.92,0.94,0.96,0.98]',alpha=1.)
+    plt.scatter(1.,0.02,marker='+',s=80,c='k',alpha=0.5)
+    plt.text(1.1,0.,'[ 0.2, 0.3, ..., 0.9, 1.0 ]',alpha=0.5)
+    plt.scatter(1.,-0.08,marker='+',s=80,c='k',alpha=1.)
+    plt.text(1.1,-0.1,'[ 0, 0.01, ..., 0.09, 0.1 ]',alpha=1.)
     
     zg = 1.0
     plt.plot([-5,(0.55+0.253*zg-0.0533*zg**2)/0.88,1.6,1.6],
@@ -179,8 +187,8 @@ with sns.axes_style("ticks"):
     
     plt.xlabel('V - J',fontsize=12)
     plt.ylabel('U - V',fontsize=12)
-    plt.xlim([-0.75, 2.0])
+    plt.xlim([-0.25, 1.75])
     plt.ylim([-0.25, 2.25])
-    plt.savefig('Composite/Composite Schematic.png',dpi=200,bbox_inches='tight')
+    plt.savefig('New/composite/Schematic_comp+.pdf',dpi=200,bbox_inches='tight')
     plt.show()
     

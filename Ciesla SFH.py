@@ -12,7 +12,7 @@ from scipy.special import erfc
 from astropy.cosmology import FlatLambdaCDM
 
 cosmo = FlatLambdaCDM(H0=70.4, Om0=0.272)
-t_start = (cosmo.hubble_time - cosmo.lookback_time(z=5)).value
+t_start = (cosmo.hubble_time - cosmo.lookback_time(z=10.)).value
 t_stop = (cosmo.hubble_time - cosmo.lookback_time(z=0.3)).value
 m_MS = 3e11
 
@@ -34,7 +34,7 @@ def RKPRG(x, m_seed):
     return res
 
 T = np.linspace(t_start, 12.5, 100)
-M_seed = np.logspace(6.0, 10.0, 5)
+M_seed = 10**np.linspace(5., 7., 5)
 
 SFR = np.empty((M_seed.size, T.size))
 dM = np.empty_like(SFR)
@@ -88,36 +88,44 @@ for k, m in enumerate(M_seed):
 #==============================================================================
 # Fig 2 in Ciesla
 #==============================================================================
-fig = plt.figure(figsize=(8,10))
+fig = plt.figure(figsize=(11,5))
 with sns.axes_style("ticks"):
-    ax1 = plt.subplot(211)
-    ax2 = plt.subplot(212)
-    for i, m_seed in enumerate(M_seed):
+    ax1 = plt.subplot(121)
+    ax2 = plt.subplot(122)
+    for i, (m_seed,c) in enumerate(zip(M_seed,['navy','steelblue','yellowgreen','gold','orangered'])):
         m,sfr = Ms[i], SFR[i]
-        ax1.semilogy(T[m<m_MS], m[m<m_MS],
+        ax1.semilogy(T[m<m_MS], m[m<m_MS],c=c,
                      label='log M$_{seed}$ = %s'%np.log10(m_seed))
-        ax2.semilogy(T[m<m_MS], sfr[m<m_MS],
+        ax2.semilogy(T[m<m_MS], sfr[m<m_MS],c=c,
                      label='log M$_{seed}$ = %s'%np.log10(m_seed))
     for ax in [ax1,ax2]:
         ax.set_xlim(1.,12.5)
         ax.set_xlabel('t (Gyr)',fontsize=15)
-        ax.legend(loc=4,fontsize=12,frameon=True,facecolor='w')
+        ax.legend(loc=4,fontsize=10,frameon=True,facecolor='w')
     ax1.set_ylim(2e5, 2e12)
     ax1.set_ylabel('M* (M$_\odot$)',fontsize=15)
-    ax2.set_ylim(1e-3, 1e4)
+    ax2.set_ylim(1e-3, 1e2)
     ax2.set_ylabel('SFR (M$_\odot$/yr)',fontsize=15)
+plt.tight_layout()
 plt.show()
 
-#fig = plt.figure(figsize=(8,6))
 #with sns.axes_style("ticks"):
-#    from scipy.interpolate import interp1d
-#    for i, m_seed in enumerate(M_seed):
+#    fig = plt.figure(figsize=(7,6))
+#    ax = plt.subplot(111)
+#    for i, (m_seed,c) in enumerate(zip(M_seed,['navy','steelblue','yellowgreen','gold','orangered'])):
 #        m,sfr = Ms[i], SFR[i]
-#        f = interp1d(T[m<m_MS],np.log10((sfr[m<m_MS])),fill_value='extrapolate')
-#        T_interp = T[m>=m_MS]
-#        SFR_interp = f(T_interp)   # use interpolation function returned by `interp1d`
-#        plt.semilogy(T[m<m_MS],(sfr[m<m_MS]), '-', T_interp, 10**SFR_interp, '--')
-#plt.show()
+#        ax.semilogy(T[m<m_MS], sfr[m<m_MS],c=c,ls="-.",
+#                     label=r'log M$\rm_{seed}$ = %s'%np.log10(m_seed))
+#    for (m,c) in zip(M_today.astype('str'),['m','b','g','orange','firebrick']):
+#        ax.semilogy(Data[m].t, Data[m]["SFR"],c=c,
+#                label=r'log M$\rm_{today}$ = %s'%m,alpha=0.7)
+#    ax.set_xlim(-0.2,12.)
+#    ax.set_xlabel('t (Gyr)',fontsize=15)
+#    ax.legend(loc=4,fontsize=12,frameon=True,facecolor='w')
+#    ax.set_ylabel('SFR (M$_\odot$/yr)',fontsize=15)
+#    plt.legend(loc="best",fontsize=12,ncol=2,frameon=True,facecolor='w')
+#    plt.tight_layout()
+#plt.savefig("New/Ciesla/AM+MS-SFH.pdf",dpi=400)
 
 #==============================================================================
 # Save SFH as txt

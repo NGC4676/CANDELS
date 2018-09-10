@@ -13,7 +13,8 @@ import matplotlib.pyplot as plt
 from scipy.optimize import leastsq, least_squares
 
 
-M_today = np.array([9.0,9.5,10.0,10.5,11.0,11.5])
+#M_today = np.array([9.0,9.5,10.0,10.5,11.0])
+M_today = np.array([9.5,10.0,10.5,10.75,11.0])
 #M_today = np.linspace(9.5,11.5,9)
 
 Data = {}
@@ -37,51 +38,51 @@ def MS_Sch(M, z):
 #==============================================================================
 # Main Sequence Aldo
 #==============================================================================
-A, P = 0.0, 1.
-z_interp  = np.array([0.5, 1., 2., 5.])
-
-with sns.axes_style("ticks"):
-    plt.figure(figsize=(9,6))
-            
-    m_plot = np.logspace(6.0, 13.0, 100)
-    plt.semilogy(np.log10(m_plot), MS_Sch(m_plot,0.5),
-             'k--',alpha=1.0)
-    plt.semilogy(np.log10(m_plot), MS_Sch(m_plot,1.0),
-             'k--',alpha=0.8)
-    plt.semilogy(np.log10(m_plot), MS_Sch(m_plot,2.0),
-             'k--',alpha=0.6)
-    plt.semilogy(np.log10(m_plot), MS_Sch(m_plot,5.0),
-             'k--',alpha=0.4)
-    
-    for m in Data:
-        
-        early = (Data[m].z>z_interp[0])
-        late = (Data[m].lgMh>11.5) & (Data[m].z>z_interp[0])
-        
-        plt.semilogy(Data[m].lgMs[early], (Data[m].SFR*\
-                     (1+A*np.sin( 2*np.pi*Data[m].t/P)))[early],
-                     label='log M$_{today}$ = %s'%m,lw=3,alpha=0.7)
-        
-        plt.semilogy(Data[m].lgMs[late], (Data[m].SFR*\
-                     (1+A*np.sin(2*np.pi*Data[m].t/P)))[late], 
-                     c='grey',lw=3)
-        
-        Ms_interp = np.interp(z_interp, Data[m].z, Data[m].lgMs)
-        SFR_interp = np.interp(z_interp, Data[m].z, Data[m].SFR)
-        s = plt.scatter(Ms_interp, SFR_interp, c=z_interp, cmap='rainbow')
-    
-    plt.text(11.,3e2,'z = 5')
-    plt.text(11.5,1.5e2,'z = 2')
-    plt.text(11.5,5e1,'z = 1')
-    plt.text(11.3,1e1,'z = 0.5')
-    plt.xlim(6,12.)
-    plt.ylim(1e-2,5e2)
-    cb = plt.colorbar(s)
-    cb.set_label('redshift')
-    plt.xlabel('log (M$_*$/M$_\odot$)')
-    plt.ylabel('SFR (M$_\odot$/yr)')
-    #plt.legend(loc='best',fontsize=9,ncol=2)
-    plt.show()
+#A, P = 0.0, 1.
+#z_interp  = np.array([0.5, 1., 2., 5.])
+#
+#with sns.axes_style("ticks"):
+#    plt.figure(figsize=(9,6))
+#            
+#    m_plot = np.logspace(6.0, 13.0, 100)
+#    plt.semilogy(np.log10(m_plot), MS_Sch(m_plot,0.5),
+#             'k--',alpha=1.0)
+#    plt.semilogy(np.log10(m_plot), MS_Sch(m_plot,1.0),
+#             'k--',alpha=0.8)
+#    plt.semilogy(np.log10(m_plot), MS_Sch(m_plot,2.0),
+#             'k--',alpha=0.6)
+#    plt.semilogy(np.log10(m_plot), MS_Sch(m_plot,5.0),
+#             'k--',alpha=0.4)
+#    
+#    for m in Data:
+#        
+#        early = (Data[m].z>z_interp[0])
+#        late = (Data[m].lgMh>11.5) & (Data[m].z>z_interp[0])
+#        
+#        plt.semilogy(Data[m].lgMs[early], (Data[m].SFR*\
+#                     (1+A*np.sin( 2*np.pi*Data[m].t/P)))[early],
+#                     label='log M$_{today}$ = %s'%m,lw=3,alpha=0.7)
+#        
+#        plt.semilogy(Data[m].lgMs[late], (Data[m].SFR*\
+#                     (1+A*np.sin(2*np.pi*Data[m].t/P)))[late], 
+#                     c='grey',lw=3)
+#        
+#        Ms_interp = np.interp(z_interp, Data[m].z, Data[m].lgMs)
+#        SFR_interp = np.interp(z_interp, Data[m].z, Data[m].SFR)
+#        s = plt.scatter(Ms_interp, SFR_interp, c=z_interp, cmap='rainbow')
+#    
+#    plt.text(11.,3e2,'z = 5')
+#    plt.text(11.5,1.5e2,'z = 2')
+#    plt.text(11.5,5e1,'z = 1')
+#    plt.text(11.3,1e1,'z = 0.5')
+#    plt.xlim(6,12.)
+#    plt.ylim(1e-2,5e2)
+#    cb = plt.colorbar(s)
+#    cb.set_label('redshift')
+#    plt.xlabel('log (M$_*$/M$_\odot$)')
+#    plt.ylabel('SFR (M$_\odot$/yr)')
+#    #plt.legend(loc='best',fontsize=9,ncol=2)
+#    plt.show()
 
 #==============================================================================
 # Main Sequence Aldo Perturb
@@ -161,18 +162,18 @@ cosmo = FlatLambdaCDM(H0=67.8, Om0=0.307)
 
 C = 0.3
 t = np.linspace(0.5,11.5,111)
-fig, axes = plt.subplots(figsize=(10,8), nrows=2, ncols=3)
+fig, axes = plt.subplots(figsize=(10,5), nrows=2, ncols=3)
 for i, m in enumerate(M_today.astype('str')):
-    ax = plt.subplot(3,3,i+1)
+    ax = plt.subplot(2,3,i+1)
     sfr = np.interp(t, Data[m].t[::-1], Data[m].SFR[::-1])
     plt.semilogy(t, sfr, 'b-',
                  label='log M$_{today}$ = %s'%m,alpha=0.5)
     R = 0.
-    for n in range(1):
-         s=plt.scatter(t, sfr*10**(-C*np.sin(5*np.pi*np.log(t) + 3*np.pi/4.)+\
+    for ph in [np.pi/4.,3*np.pi/4.,5*np.pi/4.,7*np.pi/4.]:
+         s=plt.scatter(t, sfr*10**(-C*np.sin(5*np.pi*np.log(t) + ph)+\
                              R*np.random.normal(0.,0.3,t.size)),
-                        c=np.mod(5*np.pi*np.log(t)+np.pi + 3*np.pi/4.,2*np.pi) /np.pi,
-                        marker='o',s=15,cmap='jet',alpha=0.8)
+                        c=np.mod(5*np.pi*np.log(t)+np.pi + ph,2*np.pi) /np.pi,
+                        marker='o',s=5,cmap='jet',alpha=0.5)
     if i>5:
         plt.xlabel('t (Gyr)')
     if np.mod(i,3)==0:
@@ -181,19 +182,20 @@ for i, m in enumerate(M_today.astype('str')):
     plt.xlim(-0.5,13.5)
 #plt.suptitle('A = %.1f dex'%(C),fontsize=20,y=1.02)
 plt.tight_layout()
-cbar_ax = fig.add_axes([0.2, 0.25, 0.6, 0.03])
-colorbar = fig.colorbar(s, orientation='horizontal',cax=cbar_ax)
-colorbar.set_label('Phase')
+#cbar_ax = fig.add_axes([0.2, 0.25, 0.6, 0.03])
+#colorbar = fig.colorbar(s, orientation='horizontal',cax=cbar_ax)
+#colorbar.set_label('Phase')
 plt.show()
 
-writeBC = False
+writeBC = True
 if writeBC:
     for m in Data:
         sfr = np.interp(t, Data[m].t[::-1], Data[m].SFR[::-1])
-        plt.plot(t,sfr*10**(-C*np.sin(5*np.pi*np.log(t)+3*np.pi/4.)))
-        tab = np.vstack( ( t*1e9, sfr*10**(-C*np.sin(5*np.pi*np.log(t)+3*np.pi/4.)) ) ).T
-        np.savetxt('Aldo/Perturb/Final/bc03_M%s_%.1f_ST.txt'%(m,C),tab,fmt='%.7e',header='t(yr) SFR(Msol/yr)')
-        
+        for ph in [np.pi/4.,3*np.pi/4.,5*np.pi/4.,7*np.pi/4.]: 
+            plt.plot(t,sfr*10**(-C*np.sin(5*np.pi*np.log(t)+ph)))
+            tab = np.vstack( ( t*1e9, sfr*10**(-C*np.sin(5*np.pi*np.log(t)+ph)) ) ).T
+            np.savetxt('N/Aldo/ST/bc03_M%s_p%.1f_ST%.1f.txt'%(m,ph,C),tab,fmt='%.7e',header='t(yr) SFR(Msol/yr)')
+            
 ## MS   
       
 #from scipy.integrate import simps
@@ -228,7 +230,7 @@ if writeBC:
 #==============================================================================
 with sns.axes_style("ticks"):
     fig,axes = plt.subplots(figsize=(9,8), nrows=2, ncols=2)
-    for (m,c) in zip(M_today.astype('str'),['m','b','steelblue','g','orange','firebrick']):
+    for (m,c) in zip(M_today.astype('str'),['m','b','g','orange','firebrick']):
         for i, (ax, col, ylab) in enumerate(zip(axes.ravel(),['lgMs','lgMh','SFR','SFR'],
                                       ['log M$_*$(M$_\odot$)','log M$_{halo}$(M$_\odot$)',
                                       'log SFR(M$_\odot$/yr)','log sSFR(yr$^{-1}$)'])):
@@ -242,7 +244,7 @@ with sns.axes_style("ticks"):
                 ax.plot(Data[m].t, Data[m][col],c=c,
                         label='log M$_{today}$ = %s'%m,alpha=0.7)
             ax.set_ylabel(ylab)
-    plt.legend(loc=10,bbox_to_anchor=(1.3, 1.2),
+    plt.legend(loc=10,bbox_to_anchor=(1.4, 1.2),
               fontsize=12,frameon=True,facecolor='w')
     new_tick_locs = np.array([.2, .4, .6, .7])
     for ax in axes.ravel():
@@ -270,10 +272,10 @@ with sns.axes_style("ticks"):
 #==============================================================================
 # Save SFH as txt
 #==============================================================================
-#for m in Data:
-#    plt.plot(Data[m].t,Data[m].SFR)
-#    tab=np.vstack((Data[m].t[::-1]*1e9,Data[m].SFR[::-1])).T
-#    np.savetxt('Aldo/bc03_M%s.txt'%m,tab,fmt='%.7e',header='t(yr) SFR(Msol/yr)')
+for m in Data:
+    plt.plot(Data[m].t,Data[m].SFR)
+    tab=np.vstack((Data[m].t[::-1]*1e9,Data[m].SFR[::-1])).T
+    np.savetxt('Aldo/bc03_M%s.txt'%m,tab,fmt='%.7e',header='t(yr) SFR(Msol/yr)')
    
 #==============================================================================
 # Profile
@@ -388,31 +390,31 @@ def lorentzian_hermite(x, params):
 #==============================================================================
 # Gauss-Lorentz-Herimite4th
 #==============================================================================
-#def gauss_lorentz_hermite(x, params):
-#    (c1, mu, sigma, h13, h14, c2, x0, gama, h23, h24) = params
-#    res = gaussian_hermite(x,(c1, mu, sigma, h13, h14)) + lorentzian_hermite(x, (c2, x0, gama, h23, h24)) 
-#    return res
-#
-#def gauss_lorentz_hermite_fit(params,x,y):
-#        fit = gauss_lorentz_hermite(x, params)
-#        return (fit - y)
-# 
-#plt.figure(figsize=(11,6)) 
-#sfh_par = np.empty((6,10))   
-#for i, m in enumerate(M_today.astype('str')):
-#    t,y = Data[m].t,Data[m].SFR
-#    param_guess = [1.0, 5.0, 0.5, 0.0, 0.0, 1.0, 10.0, 0.5, 0.0, 0.0]
-#    param_guess = [1.0, 5.0, 0.5, 0.0, 0.0, 1.0, 7.0, 0.5, 0.0, 0.0]
-#    param_guess = [1.0, 3.0, 0.5, 0.0, 0.0, 1.0, 7.0, 0.5, 0.0, 0.0]
-#    fit = leastsq(gauss_lorentz_hermite_fit, x0=param_guess, args=(t,y))
-#    y_fit = gauss_lorentz_hermite(t, fit[0])
-#    sfh_par[i] = fit[0]
-#    print fit
-#    ax = plt.subplot(2,3,i+1)
-#    plt.plot( t, y, 'k-')
-#    plt.plot( t, y_fit, 'k--' )
-#    plt.plot( t, gaussian_hermite(t,fit[0][:5]), 'k--',alpha=0.5)
-#    plt.plot( t, lorentzian_hermite(t,fit[0][5:]), 'k--',alpha=0.5)
-#    plt.title('log M$_{today}$ = %s'%m)
-#plt.tight_layout()
-#plt.show()
+def gauss_lorentz_hermite(x, params):
+    (c1, mu, sigma, h13, h14, c2, x0, gama, h23, h24) = params
+    res = gaussian_hermite(x,(c1, mu, sigma, h13, h14)) + lorentzian_hermite(x, (c2, x0, gama, h23, h24)) 
+    return res
+
+def gauss_lorentz_hermite_fit(params,x,y):
+        fit = gauss_lorentz_hermite(x, params)
+        return (fit - y)
+ 
+plt.figure(figsize=(11,6)) 
+sfh_par = np.empty((5,10))   
+for i, m in enumerate(M_today.astype('str')):
+    t,y = Data[m].t,Data[m].SFR
+    param_guess = [1.0, 5.0, 0.5, 0.0, 0.0, 1.0, 10.0, 0.5, 0.0, 0.0]
+    param_guess = [1.0, 5.0, 0.5, 0.0, 0.0, 1.0, 7.0, 0.5, 0.0, 0.0]
+    param_guess = [1.0, 3.0, 0.5, 0.0, 0.0, 1.0, 7.0, 0.5, 0.0, 0.0]
+    fit = leastsq(gauss_lorentz_hermite_fit, x0=param_guess, args=(t,y))
+    y_fit = gauss_lorentz_hermite(t, fit[0])
+    sfh_par[i] = fit[0]
+    print fit
+    ax = plt.subplot(2,3,i+1)
+    plt.plot( t, y, 'k-')
+    plt.plot( t, y_fit, 'k--' )
+    plt.plot( t, gaussian_hermite(t,fit[0][:5]), 'k--',alpha=0.5)
+    plt.plot( t, lorentzian_hermite(t,fit[0][5:]), 'k--',alpha=0.5)
+    plt.title('log M$_{today}$ = %s'%m)
+plt.tight_layout()
+plt.show()
