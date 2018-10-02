@@ -49,6 +49,7 @@ def MS_Sch(M, z):
     return 10**lgSFR
 from astropy.cosmology import FlatLambdaCDM
 cosmo = FlatLambdaCDM(H0=67.8, Om0=0.307) 
+cosmo = FlatLambdaCDM(H0=70.4, Om0=0.27) 
 
 #==============================================================================
 # Read model result 

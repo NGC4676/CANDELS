@@ -52,10 +52,10 @@ filter = (abs(Ms-10)<1.0) & (z_best>0.5) & (z_best<2.5) \
          & (data1.f_f160w==0) & (data1.mag_f160w_4<24.5) \
          & (data1.CLASS_STAR<0.9) & (data1.PhotFlag==0) 
 SF =  filter & (data1.sf_flag == 1) 
-Q = filter | (data1.sf_flag == -1) 
+Q = filter & (data1.sf_flag == -1) 
 
 Fang = data1[SF]
-Fang = data1[SF|Q]
+Fang2 = data1[SF|Q]
 
 # =============================================================================
 # Make GDS EAZY catalog
@@ -125,10 +125,10 @@ filter = (abs(Ms-10)<1.0) & (z_best>0.5) & (z_best<2.5) \
          & (data2.f_f160w==0) & (data2.mag_f160w_4<24.5) \
          & (data2.CLASS_STAR<0.9) & (data2.PhotFlag==0) 
 SF =  filter & (data2.sf_flag == 1) 
-Q = filter | (data2.sf_flag == -1) 
+Q = filter & (data2.sf_flag == -1) 
 
 Fang = data2[SF]
-Fang = data2[SF|Q]
+Fang2 = data2[SF|Q]
 
 # =============================================================================
 # Make UDS EAZY catalog
@@ -168,3 +168,31 @@ if make_table:
 
     np.savetxt('EAZY_catalog/EAZY_uds-%d_MC%d.cat'%(N_obj,N_mc), Data, header=' '.join(Data.colnames),
                fmt=['%d']*3+['%.5e' for i in range(len(uds_band)*2)]+['%.4f']*2)
+
+
+# =============================================================================
+# SNR level
+# =============================================================================
+snr = pd.DataFrame({})
+snr2 = pd.DataFrame({})
+for (band,id) in zip(gds_band,gds_band_id):
+#for (band,id) in zip(uds_band,uds_band_id):
+    flux = Fang[band]
+    error = Fang[band+"ERR"]
+    snr[band] = flux/error
+    flux2 = Fang2[band]
+    error2 = Fang2[band+"ERR"]
+    snr2[band] = flux2/error2
+
+col = 0
+t1 = np.log(snr.dropna().iloc[:,col]).dropna()
+t2 = np.log(snr2.dropna().iloc[:,col]).dropna()
+sns.distplot(t1[t1==t1])
+sns.distplot(t2[t2==t2])
+print t1.median(), t2.median()
+
+plt.scatter(Fang.z_best,snr.iloc[:,col],s=10,alpha=0.4)
+plt.scatter(Fang2.z_best,snr2.iloc[:,col],s=10,alpha=0.4)
+plt.ylim(0,5)
+
+

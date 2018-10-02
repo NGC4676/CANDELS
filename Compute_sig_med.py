@@ -12,6 +12,7 @@ import asciitable as asc
 from astropy.io import ascii
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+plt.rcParams["font.family"] = "Times New Roman"
 import seaborn as sns
 
 def compute_stat(res,t,t1,t2,t3,t4,t5):
@@ -48,6 +49,8 @@ M_class =  np.array([M_par for T in range(lgAge.size)]).ravel()
 # Read FAST SED-fitting result
 #==============================================================================
 table = ascii.read("N/Aldo/Aldo_exp.fout",header_start=16).to_pandas()
+#table = ascii.read("N/Ciesla/Ciesla_exp.fout",header_start=16).to_pandas()
+
 
 Ages_FAST = table.lage
 SFH_FAST = table.ltau
@@ -60,6 +63,7 @@ age_cond = (lgAges>np.log10(2.e9))&(lgAges<np.log10(9.e9))
 
 S = 100
 table2 = ascii.read("N/Aldo/Aldo_exp_obs.fout",header_start=16).to_pandas()
+#table2 = ascii.read("N/Ciesla/Ciesla_exp_obs.fout",header_start=16).to_pandas()
 Ages_FAST2 = table2.lage
 SFH_FAST2 = table2.ltau
 M_FAST2 = table2.lmass
@@ -68,6 +72,7 @@ Av_FAST2 = table2.Av
 M_class2 = np.tile(M_class,S)
 
 table2d = ascii.read("N/Aldo/Aldo_del_obs.fout",header_start=16).to_pandas()
+#table2d = ascii.read("N/Ciesla/Ciesla_del_obs.fout",header_start=16).to_pandas()
 Ages_FAST2d = table2d.lage
 SFH_FAST2d = table2d.ltau
 M_FAST2d = table2d.lmass
@@ -107,21 +112,23 @@ for i, (model, FAST) in enumerate(zip([lgMs,lgSSFR,np.ones_like(lgMs)],
     models = np.tile(model,S)
     model_ages = np.tile(lgAges,S)
     age_conds = np.tile(age_cond,S)
-    for m,c in zip(M_par,M_color):    
+    for j,(m,c) in enumerate(zip(M_par,M_color)):    
         stds, meds = compute_stat((FAST-models)[M_class2==m], 
                                   model_ages[M_class2==m],
                                   9.42,9.52,9.63,9.77,9.936)
-        s=ax1.plot(z_bin, meds,"o--",color=c,ms=4,lw=0.5,mfc="None",alpha=0.8,
-                   label=r'M$\rm_{today}$=10$^{%s}$'%m,zorder=1)
-        ax2.plot(z_bin, stds,"o--",color=c,ms=4,lw=0.5,mfc="None",alpha=0.8)
+        s=ax1.plot(z_bin, meds,"o--",color=c,ms=7,lw=1.,mfc="w",
+                   #label=r'M$\rm_{seed}$=10$^{%s}$'%m,
+                   label="RP%d"%j,alpha=0.8,zorder=1)
+        ax2.plot(z_bin, stds,"o--",color=c,ms=7,lw=1.,mfc="w",alpha=0.8)
         
         if i==0: 
-            ax1.scatter(0.67,0.15,marker="o",facecolors="none",edgecolors="k",linewidths=0.5,transform=ax1.transAxes)
-            ax1.scatter(0.67,0.08,marker="^",c="k",linewidths=0.5,transform=ax1.transAxes)
-            ax1.text(0.72,0.065,r"delayed-$\tau$",fontsize=8,transform=ax1.transAxes)
-            ax1.text(0.72,0.14,r"$\tau$",fontsize=8,transform=ax1.transAxes)
+            ax1.scatter(0.625,0.155,marker="o",facecolors="none",edgecolors="k",linewidths=0.5,transform=ax1.transAxes)
+            ax1.scatter(0.65,0.085,marker="^",c="k",linewidths=0.5,transform=ax1.transAxes)
+            ax1.text(0.7,0.065,"Delayed",fontsize=9,transform=ax1.transAxes)
+            ax1.text(0.665,0.14,"Exponential",fontsize=9,transform=ax1.transAxes)
 
-            ax1.legend(loc=2,fontsize=8,labelspacing=0.5,frameon=False)
+            ax1.legend(loc=2,fontsize=10,labelspacing=0.7,frameon=False)
+#            ax2.legend(loc=1,fontsize=10,labelspacing=0.5,frameon=False)
 
     ax1.set_xlim(2.5,0.5)
     ax2.set_xlim(2.5,0.5)
@@ -134,27 +141,27 @@ for i, (l,model, FAST) in enumerate(zip(['M$_*$','sSFR','Av'],
     models = np.tile(model,S)
     model_ages = np.tile(lgAges,S)
     age_conds = np.tile(age_cond,S)
-    for m,c in zip(M_par,M_color):    
+    for j,(m,c) in enumerate(zip(M_par,M_color)):    
         stdsd, medsd = compute_stat((FAST-models)[M_class2==m], 
                                   model_ages[M_class2==m],
                                   9.42,9.52,9.63,9.77,9.936)
-        ax1.plot(z_bin, medsd,"^-",color=c,ms=4,lw=0.5,alpha=0.8,zorder=1)
-        ax2.plot(z_bin, stdsd,"^-",color=c,ms=4,lw=0.5,alpha=0.8)
+        ax1.plot(z_bin, medsd,"^-",color=c,ms=7,lw=1.,alpha=0.8,zorder=2)
+        ax2.plot(z_bin, stdsd,"^-",color=c,ms=7,lw=1.,alpha=0.8,zorder=2)
 
     ax1.hlines(0,0.5,2.5,linestyles="dotted",linewidth=1,alpha=0.7,zorder=0)
     ax1.set_xlim(2.5,0.5)
     ax2.set_xlabel("z",fontsize="large")
 
     if i==0:
-        ax1.set_ylabel("median offset",fontsize="large")
+        ax1.set_ylabel("Median Offset",fontsize="large")
         ax2.set_ylabel("$\sigma$",fontsize="large")
 
-    ax2.annotate(l, (0.05, 0.), xytext=(0, 5), rotation=0,
+    ax2.annotate(l, (0., 0.), xytext=(3,3), rotation=0, size=13,
                         textcoords='offset points', xycoords='axes fraction',
-                        va='bottom', size=12)
-
+                        va='bottom', bbox=dict(facecolor='none',pad=3.),zorder=1)
 plt.subplots_adjust(left=0.1,right=0.95,bottom=0.1,top=0.95,
                     wspace=0.3,hspace=0.001)
 
-plt.savefig("N/Aldo/Stat_Fitting_AM",dpi=300)
-    
+plt.savefig("N/Aldo/Stat_Fitting_AM.pdf",dpi=300)
+#plt.savefig("N/Ciesla/Stat_Fitting_MS.pdf",dpi=300)
+   

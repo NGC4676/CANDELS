@@ -23,6 +23,7 @@ from smpy.dust import Calzetti
 
 # Go to smpy.smpy to set cosmo, the current is below:
 cosmo = FlatLambdaCDM(H0=67.8, Om0=0.307) 
+cosmo = FlatLambdaCDM(H0=70.4, Om0=0.27) 
 
 #==============================================================================
 # Rodriguez-Puebla 2017
@@ -76,18 +77,18 @@ SED = np.squeeze(models.SED.value)
 #==============================================================================
 # Show Spectrum
 #==============================================================================
-#iT = 30 
-#plt.figure(figsize=(8,4))
-#for j in range(6):
-#    plt.semilogy(models.wave,SED[iT,j,:],lw=1)
-#plt.fill_between(np.linspace(3e3,4.2e3,10), 1, 1e-7,facecolor='grey', alpha=0.3)
-#plt.fill_between(np.linspace(4.8e3,6.9e3,10), 1, 1e-7,facecolor='grey', alpha=0.3)
-#plt.fill_between(np.linspace(1.1e4,1.34e4,10), 1, 1e-7,facecolor='grey', alpha=0.3)
-#plt.xlabel('Wavelength',fontsize=15)
-#plt.ylabel('Flux',fontsize=15)
-#plt.text(1.2e4,1e-3,'T = %.1f Gyr'%Ages[iT].value,fontsize=15)
-#plt.xlim(1e3,1.5e4)
-#plt.ylim(3e-6,5e-3)
+iT = 30 
+plt.figure(figsize=(8,4))
+for j in range(5):
+    plt.semilogy(models.wave,SED[iT,j,:],lw=1)
+plt.fill_between(np.linspace(3e3,4.2e3,10), 1, 1e-7,facecolor='grey', alpha=0.3)
+plt.fill_between(np.linspace(4.8e3,6.9e3,10), 1, 1e-7,facecolor='grey', alpha=0.3)
+plt.fill_between(np.linspace(1.1e4,1.34e4,10), 1, 1e-7,facecolor='grey', alpha=0.3)
+plt.xlabel('Wavelength',fontsize=15)
+plt.ylabel('Flux',fontsize=15)
+plt.text(1.2e4,1e-3,'T = %.1f Gyr'%Ages[iT].value,fontsize=15)
+plt.xlim(1e3,1.5e4)
+plt.ylim(3e-6,5e-3)
 
 #for k in range(220):
 #    print (models.ta[k+1]-models.ta[k]).to('Gyr'),models.ta[k].to('Gyr')
@@ -249,27 +250,104 @@ UV = pd.DataFrame(np.squeeze(U_V))
 VJ = pd.DataFrame(np.squeeze(V_J))
 SFR = pd.DataFrame(np.squeeze(models.SFR)[:,:5])
 
+# =============================================================================
+# Aldo+Ciesla
+# =============================================================================
+# U-V
+
+def plot_UV():
+    plt.legend(loc=4,fontsize=12,frameon=True,facecolor='w')
+    plt.xlabel('Cosmic Time (Gyr)',fontsize=15)
+    plt.ylabel('U - V',fontsize=15)
+    plt.axhline(0.5,color='c',ls='-',lw=2,zorder=2,alpha=0.6)
+    plt.axhline(0.4,color='c',ls=':',lw=1,zorder=2,alpha=0.6)
+    plt.axhline(0.6,color='c',ls=':',lw=1,zorder=2,alpha=0.6)
+    plt.axvline(2.5,color='k',ls='--',lw=1,alpha=0.5,zorder=1)
+    plt.axvline(8.5,color='k',ls='--',lw=1,alpha=0.5,zorder=1)
+    plt.xlim(0.,11.5)
+    plt.ylim(0.,1.2)
+
+csfont = {'fontname':'helvetica'}
+
+fig=plt.figure(figsize=(11,5))
+ax=plt.subplot(121)
+for i, (m,c) in enumerate(zip(M_today,['m','b','g','orange','firebrick'])):
+    plt.plot(Ages,UV_a[i],color=c,lw=2,# label=r'log M$\rm_{today}$ = %g'%m
+             label=r"RP%d"%(i+1),zorder=3)
+plt.text(0.3,1.1,"AM-SFH",va='center',fontsize=15,**csfont)
+plot_UV()
+ax=plt.subplot(122)
+for i, (m,c) in enumerate(zip(M_seed,['navy','steelblue','yellowgreen','gold','orangered'])):
+    plt.plot(Ages,UV_c[i],c=c,lw=2,#label=r'log M$\rm _{seed}$ = %.1f'%np.log10(m)
+             label=r"C%d"%(i+1),zorder=3)
+plot_UV()
+plt.text(0.3,1.1,"MS-SFH",va='center',fontsize=15,**csfont)
+fig.subplots_adjust(left=0.075,right=0.975,bottom=0.125,top=0.95,wspace=0.25)
+plt.savefig("N/AM+MS_UV.pdf")
+#plt.show()
+
+
+# UVJ
+def plot_UVJ():
+    plt.fill(np.concatenate((X_e[0,:,-1,0,0].value,
+                         X_e[0,-1,:,0,0].value[::-1],
+                         X_e[0,:,0,0,0].value[::-1])),
+         np.concatenate((Y_e[0,:,-1,0,0].value,
+                         Y_e[0,-1,:,0,0].value[::-1],
+                         Y_e[0,:,0,0,0].value[::-1])),
+         'grey',alpha=0.3)
+    zg = 1.0
+    plt.plot([-5,(0.55+0.253*zg-0.0533*zg**2)/0.88,1.6,1.6],
+              [1.3,1.3,2.158-0.253*zg+0.0533*zg**2,2.5], color='k', alpha=0.7,zorder=1)
+    leg=plt.legend(loc='best',fontsize=12,frameon=True,facecolor='w')
+    for legobj in leg.legendHandles:
+        legobj.set_linewidth(3)
+    plt.xlabel('V - J',fontsize=15)
+    plt.ylabel('U - V',fontsize=15)
+    plt.xlim([-0.25, 1.75])
+    plt.ylim([-0.25, 2.25])
+    
+fig=plt.figure(figsize=(11,5))
+ax=plt.subplot(121)
+with quantity_support():
+    for k, Av in enumerate(Dust):
+        for j, (m,c) in enumerate(zip(M_today,['m','b','g','orange','firebrick'])):
+                plt.plot(X_a[0,:,j,k,0], Y_a[0,:,j,k,0], label=r"RP%d"%(j+1),
+                         c=c,lw=5, alpha=0.7,zorder=6-j)
+    plot_UVJ()
+plt.text(0.4,0.4,"AM-SFH",va='center',fontsize=15,**csfont)
+
+ax=plt.subplot(122)                
+with quantity_support():
+    for k, Av in enumerate(Dust):
+        for j, (m,c) in enumerate(zip(M_seed,['navy','steelblue','yellowgreen','gold','orangered'])):
+                plt.plot(X_c[0,:,j,k,0], Y_c[0,:,j,k,0], label=r"C%d"%(j+1),
+                         c=c,lw=5, alpha=0.7,zorder=6-j)
+    plot_UVJ()
+plt.text(0.4,0.4,"MS-SFH",va='center',fontsize=15,**csfont)
+fig.subplots_adjust(left=0.075,right=0.975,bottom=0.125,top=0.95,wspace=0.25)
+plt.savefig("N/AM+MS_UVJ.pdf")
+
+# =============================================================================
+
+# U-V
+
 plt.figure(figsize=(6,6))
 ax=plt.subplot(111)
 for i, (m,c) in enumerate(zip(M_today,['m','b','g','orange','firebrick'])):
-    plt.plot(Ages,UV[i],color=c,lw=2,label=r'log M$\rm_{today}$ = %g'%m,zorder=3)
-plt.legend(loc='best',fontsize=11,frameon=True,facecolor='w')
-plt.xlabel('T (Gyr)',fontsize=15)
-plt.ylabel('U - V',fontsize=15)
-plt.axhline(0.5,color='c',ls='-',lw=1,zorder=2)
-plt.axhline(0.4,color='c',ls=':',lw=1,zorder=2)
-plt.axhline(0.6,color='c',ls=':',lw=1,zorder=2)
-plt.axvline(2.5,color='k',ls='--',lw=1,alpha=0.5,zorder=1)
-plt.axvline(8.5,color='k',ls='--',lw=1,alpha=0.5,zorder=1)
-plt.xlim(0.,11.5)
-plt.ylim(0.,1.2)
+    plt.plot(Ages,UV[i],color=c,lw=2,# label=r'log M$\rm_{today}$ = %g'%m
+             label=r"RP %d"%(i+1),zorder=3)
+plot_UV()
 plt.tight_layout()
 #plt.savefig("N/AM_UV.pdf",dpi=400)
 #plt.show()
+
+#CSED
+
 for i, (m,c) in enumerate(zip(M_today.astype('str'),['m','b','g','orange','firebrick'])):
     plt.plot(Ages,Csed[i],color=c,label=r'log M$\rm_{today}$ = %s'%m)
 plt.legend(loc='best',fontsize=10,frameon=True,facecolor='w')
-plt.xlabel('T (Gyr)',fontsize=15)
+plt.xlabel('Cosmic Time (Gyr)',fontsize=15)
 plt.ylabel('C$_{SED}$',fontsize=15)
 plt.axhline(0.25,color='c',ls=':',lw=3)
 plt.axvline(2.5,color='k',ls='--',lw=2,alpha=0.5)
@@ -279,6 +357,7 @@ plt.ylim(0.,0.5)
 plt.tight_layout()
 #plt.savefig("New/Aldo/AM_UV_Csed.png",dpi=400)
 plt.show()
+
 
 plt.figure(figsize=(12,6))
 ax=plt.subplot(121)
@@ -300,7 +379,6 @@ plt.legend(loc='best',fontsize=11,frameon=True,facecolor='w')
 plt.tight_layout()
 #plt.savefig("New/Exp_UVJ_SSFR.png",dpi=400)
 plt.show()
-
 
 # =============================================================================
 # F-F Calibration
@@ -376,9 +454,6 @@ if make_table:
                    fmt=['%d']+['%.5e' for i in range(20)]+['%.2f'])
 #        np.savetxt('Aldo/Perturb/Final/Aldo_SFH_P%.1f.cat'%P, table, header=' '.join(table.colnames),
 #                   fmt=['%d']+['%.5e' for i in range(20)]+['%.2f'])
-    elif emission:
-        np.savetxt('Aldo/Aldo_SFH_elnm.cat', data_tot, header=' '.join(data_tot.colnames),
-                   fmt=['%d']+['%.5e' for i in range(20)]+['%.2f'])
     else:
         np.savetxt('N/Aldo/Aldo_SFH_obs.cat', data_tot, header=' '.join(data_tot.colnames),
                    fmt=['%d']+['%.5e' for i in range(20)]+['%.2f'])

@@ -10,6 +10,8 @@ import seaborn as sns
 import asciitable as asc
 import pandas as pd
 import matplotlib.pyplot as plt
+plt.rcParams["font.family"] = "Times New Roman"
+csfont = {'fontname':'helvetica'}
 
 import astropy.units as u
 from astropy.cosmology import FlatLambdaCDM
@@ -21,6 +23,7 @@ from smpy.dust import Calzetti
 
 # Go to smpy.smpy to set cosmo, the current is below:
 cosmo = FlatLambdaCDM(H0=67.8, Om0=0.307) 
+cosmo = FlatLambdaCDM(H0=70.4, Om0=0.27) 
 
 #==============================================================================
 # Composite Model
@@ -66,7 +69,7 @@ models_C = CSP(bc03, age = Ages, sfh = M_seed,
 
 # Exponential
 Ages_2 = np.logspace(-2., 1.2, 40)* u.Gyr
-SFH = np.array([0.5, 1., 3., 5., 10., 20.]) * u.Gyr
+SFH = np.array([0.5, 1., 3., 10., 20.]) * u.Gyr
 
 SFH_law = exponential
 models_exp = CSP(bc03, age = Ages_2, sfh = SFH, 
@@ -151,251 +154,195 @@ Csed_del = pd.DataFrame(np.squeeze(np.cos(theta)*U_V - np.sin(theta)*V_J))
 UV_del = pd.DataFrame(np.squeeze(U_V))
 VJ_del = pd.DataFrame(np.squeeze(V_J))
 
-#==============================================================================
-# Csed/UV vs Time
-#==============================================================================
-with sns.axes_style("ticks"):
-    plt.figure(figsize=(8,8))
-    plt.fill_between(pd.Series(Ages.value), np.max(UV_C,axis=1), np.min(UV_C,axis=1), 
-                 label='Ciesla17', color='skyblue', alpha=0.2)
-    plt.fill_between(pd.Series(Ages.value), np.max(UV_A,axis=1), np.min(UV_A,axis=1), 
-                 label='RP17', color='g', alpha=0.2)
-    plt.fill_between(pd.Series(Ages_2.value+0.5), np.max(UV_exp,axis=1), np.min(UV_exp,axis=1), 
-                 label='Exponential', color='firebrick', alpha=0.2)
-    plt.fill_between(pd.Series(Ages_2.value+0.5), np.max(UV_del,axis=1), np.min(UV_del,axis=1), 
-                 label='Delayed',color='orange', alpha=0.2)
-    #plt.legend(loc=4,fontsize=12,frameon=True,facecolor='w')
-    
-    plt.xlabel('T (Gyr)',fontsize=15)
-    plt.ylabel('U - V',fontsize=15)
-    plt.axhline(0.5,color='c',ls=':',lw=3)
-    plt.axvline(3.,color='k',ls='--',lw=2,alpha=0.5)
-    plt.axvline(7.,color='k',ls='--',lw=2,alpha=0.5)
-    plt.xlim(0.,11.)
-    plt.ylim(0.0,1.2)
 
-    plt.scatter(tgs, uvs, s=60, linewidth=2,
-                facecolor='greenyellow', edgecolor='k',alpha=1.,zorder=2,label="CANDELS SF+GV")
-    plt.errorbar(tgs, uvs,
-                 yerr = [uva,uvb],fmt='o',
-                 c='grey',alpha=0.5,capsize=5,zorder=1)
-    plt.legend(loc=4,fontsize=11,frameon=True,facecolor='w')
-    plt.plot(Ages,UV_C.iloc[:,2],c='skyblue',lw=3,alpha=0.7)
-    plt.plot(Ages,UV_A.iloc[:,3],c='g',lw=3,alpha=0.3)
-    plt.plot(Ages_2+0.75*u.Gyr,UV_exp.iloc[:,2],c='firebrick',lw=3,alpha=0.5)
-    plt.plot(Ages_2+0.75*u.Gyr,UV_del.iloc[:,2],c='orange',lw=3,alpha=0.3)
-plt.tight_layout()
-#plt.savefig("New/UV_Evo_SF+GV.pdf")
-plt.show()
-
-# =============================================================================
-#  
-# =============================================================================
-
-#with sns.axes_style("ticks"):
-#    plt.figure(figsize=(8,8))
-#    plt.fill_between(pd.Series(Ages.value), np.max(Csed_C,axis=1), np.min(Csed_C,axis=1), 
-#                 label='Ciesla17', color='skyblue', alpha=0.2)
-#    plt.fill_between(pd.Series(Ages.value), np.max(Csed_A,axis=1), np.min(Csed_A,axis=1), 
-#                 label='RP17', color='g', alpha=0.2)
-#    plt.fill_between(pd.Series(Ages_2.value), np.max(Csed_exp,axis=1),
-#     np.min(Csed_exp,axis=1), 
-#                 label='Exponential', color='firebrick', alpha=0.2)
-#    plt.fill_between(pd.Series(Ages_2.value), np.max(Csed_del,axis=1),
-#     np.min(Csed_del,axis=1), 
-#                 label='Delayed',color='orange', alpha=0.2)
-#    #plt.legend(loc=4,fontsize=12,frameon=True,facecolor='w')
-#    
-#    plt.xlabel('T (Gyr)',fontsize=15)
-#    plt.ylabel('C$_{SED}$',fontsize=15)
-#    plt.axhline(0.25,color='c',ls=':',lw=3)
-#    plt.axvline(2.5,color='k',ls='--',lw=2,alpha=0.5)
-#    plt.axvline(8.5,color='k',ls='--',lw=2,alpha=0.5)
-#    plt.xlim(-0.5,12.5)
-#    plt.ylim(0.0,.5)
-#
-#    plt.scatter(tgs[tgs>3.3]-0.1, cseds_SF[tgs>3.3], s=60, linewidth=2,marker="^",
-#                facecolor='b', edgecolor='k',alpha=1.,zorder=3,label="CANDELS SF")
-#    plt.scatter(tgs[tgs<3.3]-0.1, cseds_SF[tgs<3.3], s=60, linewidth=2,marker="^",
-#                facecolor='b', edgecolor='k',alpha=.5,zorder=3)
-#    
-#    plt.scatter(tgs[tgs>3.3], cseds[tgs>3.3], s=60, linewidth=2,
-#                facecolor='greenyellow', edgecolor='k',alpha=1.,zorder=2,label="CANDELS SF+GV")
-#    plt.scatter(tgs[tgs<3.3], cseds[tgs<3.3], s=60, linewidth=2,
-#                facecolor='greenyellow', edgecolor='k',alpha=.5,zorder=3)
-##    plt.errorbar(tgs, cseds,
-##                 yerr = [cseda,csedb],fmt='o',
-##                 c='grey',alpha=0.5,capsize=5,zorder=1)
-#    plt.legend(loc=4,fontsize=12,frameon=True,facecolor='w')
-#    plt.plot(Ages,Csed_C.iloc[:,2],c='skyblue',lw=3,alpha=0.7)
-#    plt.plot(Ages,Csed_A.iloc[:,3],c='g',lw=3,alpha=0.3)
-#    plt.plot(Ages_2,Csed_exp.iloc[:,2],c='firebrick',lw=3,alpha=0.5)
-#    plt.plot(Ages_2,Csed_del.iloc[:,2],c='orange',lw=3,alpha=0.5)
-#plt.tight_layout()
-##plt.savefig("New/Csed_Evo_all.pdf")
-#plt.show()
-
-# =============================================================================
-# Csed/UV vs Time All 
-# =============================================================================
-with sns.axes_style("ticks"):
-    plt.figure(figsize=(8,8))
-    plt.fill_between(pd.Series(Ages.value), np.max(UV_C,axis=1), np.min(UV_C,axis=1), 
-                 label='Ciesla17', color='skyblue', alpha=0.3)
-    plt.fill_between(pd.Series(Ages.value), np.max(UV_A,axis=1), np.min(UV_A,axis=1), 
-                 label='RP17', color='lightgreen', alpha=0.3)
+def plot_setting():
+    plt.rcParams["font.family"] = "Times New Roman"
+    csfont = {'fontname':'helvetica'}
     plt.fill_between(pd.Series((Ages_2+0.75*u.Gyr).value), np.max(UV_exp,axis=1), np.min(UV_exp,axis=1), 
-                 label='Exponential', color='salmon', alpha=0.3)
+                 label='Exponential', color='salmon', zorder=1,alpha=0.3)
     plt.fill_between(pd.Series((Ages_2+0.75*u.Gyr).value), np.max(UV_del,axis=1), np.min(UV_del,axis=1), 
-                 label='Delayed',color='orange', alpha=0.3)
-    #plt.legend(loc=4,fontsize=12,frameon=True,facecolor='w')
-
-    plt.axhline(0.5,color='c',ls='-',lw=1,zorder=2)
-    plt.axhline(0.4,color='c',ls=':',lw=1,zorder=2)
-    plt.axhline(0.6,color='c',ls=':',lw=1,zorder=2)
+                 label='Delayed',color='orange', zorder=0,alpha=0.3)
+    plt.fill_between(pd.Series(Ages.value), np.max(UV_A,axis=1), np.min(UV_A,axis=1), 
+                 label='AM-SFH', color='lightgreen', zorder=2,alpha=0.3)
+    plt.fill_between(pd.Series(Ages.value), np.max(UV_C,axis=1), np.min(UV_C,axis=1), 
+                 label='MS-SFH', color='skyblue', zorder=2, alpha=0.3)
+    plt.axhline(0.5,color='c',ls='-',lw=2,zorder=2,alpha=0.6)
+    plt.axhline(0.4,color='c',ls=':',lw=1,zorder=2,alpha=0.6)
+    plt.axhline(0.6,color='c',ls=':',lw=1,zorder=2,alpha=0.6)
     plt.axvline(2.5,color='k',ls='--',lw=1,alpha=0.5,zorder=1)
     plt.axvline(8.5,color='k',ls='--',lw=1,alpha=0.5,zorder=1)
-
-    plt.plot(tgs-0.1, uvs_SF, lw=2.5, ls="-.",
+    plt.plot(Ages_2+0.7*u.Gyr,UV_exp.iloc[:,2],c='firebrick',lw=3,alpha=0.5,zorder=3,label='_nolegend_')
+    plt.plot(Ages_2+0.7*u.Gyr,UV_del.iloc[:,2],c='darkorange',lw=3,alpha=0.7,zorder=3,label='_nolegend_')
+    plt.plot(Ages,UV_C.iloc[:,3],c='royalblue',lw=3,alpha=0.7,zorder=3,label='_nolegend_')
+    plt.plot(Ages,UV_A.iloc[:,3],c='seagreen',lw=3,alpha=0.7,zorder=3,label='_nolegend_')
+    plt.xlabel('Cosmic Time (Gyr)',fontsize=15)
+    plt.xlim(-0.2,12.2)
+    plt.ylim(0.0,1.2)
+    plt.plot([0.2,.6],[1.15,1.15],c='firebrick',lw=3,alpha=0.5)
+    plt.plot([0.2,.6],[1.1,1.1],c='darkorange',lw=3,alpha=0.7)
+    plt.text(0.9,1.15,r"Exponential ($\tau=$3 Gyr)",
+             color='firebrick',va="center",fontsize=12)
+    plt.text(0.9,1.1,r"Delayed ($\tau=$3 Gyr)",
+             color='darkorange',va="center",fontsize=12)
+    plt.plot([0.2,.6],[1.05,1.05],c='seagreen',lw=3,alpha=0.7)
+    plt.plot([0.2,.6],[1.0,1.0],c='royalblue',lw=3,alpha=0.5)
+    plt.text(0.9,1.05,r"AM-SFH (RP4)",
+             color='seagreen',va="center",fontsize=12)
+    plt.text(0.9,1.0,r"MS-SFH (C4)",
+             color='royalblue',va="center",fontsize=12)
+  
+# =============================================================================
+# UV/Csed vs Time All Median
+# =============================================================================
+with sns.axes_style("ticks"):
+    plt.figure(figsize=(8,8))
+    plot_setting()
+    d = 0.1
+    plt.plot(tgs-d, uvs_SF, lw=2.5, ls="-.",
                 c='b', alpha=.8,zorder=4)
     plt.plot(tgs, uvs, lw=2.5,ls="-.",
                 c='limegreen', alpha=.8,zorder=4)
-    plt.plot(tgs+0.1, uvs_a, lw=2.5,ls="-.",
+    plt.plot(tgs+d, uvs_a, lw=2.5,ls="-.",
                 c='orangered', alpha=.8,zorder=4)
 
-    plt.scatter(tgs-0.1, uvs_SF, s=80, linewidth=2,marker="^",
-                facecolor='b', edgecolor='k',alpha=.8,zorder=5,label="CANDELS SFG $_{pure}$")
-    plt.scatter(tgs, uvs, s=80, linewidth=2,
-                facecolor='limegreen', edgecolor='k',alpha=.8,zorder=5,label="CANDELS SFG $_{UVJ}$")
-    plt.scatter(tgs+0.1, uvs_a, s=80, linewidth=2,marker="s",
+    plt.scatter(tgs-d, uvs_SF, s=100, linewidth=2,marker="o",
+                facecolor='b', edgecolor='k',alpha=.8,zorder=6,label="CANDELS SF\n   (MS+UVJ)")
+    plt.scatter(tgs, uvs, s=100, linewidth=2,marker="^",
+                facecolor='limegreen', edgecolor='k',alpha=.8,zorder=7,label="CANDELS SF\n      (UVJ)")
+    plt.scatter(tgs+d, uvs_a, s=100, linewidth=2,marker="s",
                 facecolor='orangered', edgecolor='k',alpha=.8,zorder=5,label="CANDELS All")
 
-    plt.errorbar(tgs-0.1, uvs_SF, 
-                 yerr = [uva_SF,uvb_SF],fmt='^',
-                 c='b',alpha=0.5,capsize=5,zorder=3)
-    plt.errorbar(tgs, uvs, 
-                 yerr = [uva,uvb],fmt='o',
-                 c='limegreen',alpha=0.7,capsize=5,zorder=3)
-    plt.errorbar(tgs+0.1, uvs_a, 
-                 yerr = [uva_a,uvb_a],fmt='s',
-                 c='orangered',alpha=0.7,capsize=5,zorder=3)
-    plt.legend(loc=4,fontsize=12,frameon=True,facecolor='w')
+    plt.errorbar(tgs+d, uvs_a, yerr = [uva_a,uvb_a],fmt=' ',c='orangered',
+                 alpha=0.5,elinewidth=3,capsize=6,capthick=2,zorder=3)
+    plt.errorbar(tgs, uvs, yerr = [uva,uvb],fmt=' ',c='limegreen',
+                 alpha=0.6,elinewidth=3,capsize=6,capthick=2,zorder=3)
+    plt.errorbar(tgs-d, uvs_SF, yerr = [uva_SF,uvb_SF],fmt=' ',c='b',
+                 alpha=0.5,elinewidth=3,capsize=6,capthick=2,zorder=3)
 
-    plt.plot(Ages,UV_C.iloc[:,2],c='royalblue',lw=3,alpha=0.9,zorder=3)
-    plt.plot(Ages,UV_A.iloc[:,3],c='g',lw=3,alpha=0.9,zorder=3)
-    plt.plot(Ages_2+0.75*u.Gyr,UV_exp.iloc[:,2],c='firebrick',lw=3,alpha=0.7,zorder=3)
-    plt.plot(Ages_2+0.75*u.Gyr,UV_del.iloc[:,2],c='darkorange',lw=3,alpha=0.7,zorder=3)
-
-    plt.xlabel('Cosmic Time (Gyr)',fontsize=15)
     plt.ylabel('U - V',fontsize=15)
-    plt.xlim(0.,12.5)
-    plt.ylim(0.0,1.2)
+    plt.xticks(fontsize=12);plt.yticks(fontsize=12)
+    plt.legend(loc=4,fontsize=12,frameon=True,facecolor='w',labelspacing=0.6)
+    plt.annotate('Papovich+15 MW',xy=(.74,.086),xytext=(0.58, .086),xycoords='axes fraction', 
+            arrowprops=dict(arrowstyle='-[, widthB=2.0, lengthB=.6', lw=1.5),
+            fontsize=14, ha='center', va='center', zorder=7,**csfont)
+#    plt.annotate('RP+17 MW', xy=(.74,.086), xytext=(0.64, .086), xycoords='axes fraction', 
+#            arrowprops=dict(arrowstyle='-[, widthB=2.0, lengthB=0.6', lw=1.5),
+#            fontsize=14, ha='center', va='center',zorder=7,**csfont)
 
 plt.tight_layout()
-#plt.savefig("N/UV_Evo_all.pdf",dpi=400)
+#plt.savefig("N/UV_Evo_all_med.pdf",dpi=400)
+plt.show()
+
+
+
+# =============================================================================
+#  Mean
+# =============================================================================
+
+with sns.axes_style("ticks"):
+    plt.figure(figsize=(8,8))
+    plot_setting()
+    d = 0.1
+    plt.plot(tgs, uvm, lw=2.5,ls="-.",
+                c='limegreen', alpha=.8,zorder=4)
+    plt.plot(tgs+d, uvm_a, lw=2.5,ls="-.",
+                c='orangered', alpha=.8,zorder=4)
+    plt.plot(tgs-d, uvm_SF, lw=2.5, ls="-.",
+                c='royalblue', alpha=.8,zorder=4)
+
+    plt.scatter(tgs-d, uvm_SF, s=120, linewidth=2,marker="o",
+                facecolor='royalblue', edgecolor='None',alpha=.8,zorder=7,label="CANDELS SFG (MS+UVJ)")
+    plt.scatter(tgs, uvm, s=100, linewidth=2,marker="^",
+                facecolor='limegreen', edgecolor='None',alpha=.8,zorder=6,label="CANDELS SFG (UVJ)")
+    plt.scatter(tgs+d, uvm_a, s=80, linewidth=2,marker="s",
+                facecolor='orangered', edgecolor='None',alpha=.8,zorder=5,label="CANDELS All")
+    
+    plt.errorbar(tgs+d, uvm_a, 
+                 yerr = 3*uv_bt_a,fmt=' ',
+                 c='orangered',alpha=0.7,elinewidth=3,zorder=3)
+    plt.errorbar(tgs, uvm, 
+                 yerr = 3*uv_bt,fmt=' ',
+                 c='limegreen',alpha=0.7,elinewidth=3,zorder=3)
+    plt.errorbar(tgs-d, uvm_SF, 
+                 yerr = 3*uv_bt_SF,fmt=' ',
+                 c='royalblue',alpha=0.7,elinewidth=3,zorder=3)
+    
+    plt.legend(loc=4,fontsize=12,frameon=True,facecolor='w')
+
+plt.tight_layout()
+#plt.savefig("N/UV_Evo_MS_UVJ_all_2.pdf",dpi=400)
 plt.show()
 
 # =============================================================================
 #  Mean + Median
 # =============================================================================
 with sns.axes_style("ticks"):
+    d = 0.1
     plt.figure(figsize=(15,8))
     plt.subplot(121)
-    plt.fill_between(pd.Series(Ages.value), np.max(UV_C,axis=1), np.min(UV_C,axis=1), 
-                 label='Ciesla17', color='skyblue', alpha=0.3)
-    plt.fill_between(pd.Series(Ages.value), np.max(UV_A,axis=1), np.min(UV_A,axis=1), 
-                 label='RP17', color='lightgreen', alpha=0.3)
-    plt.fill_between(pd.Series(Ages_2.value), np.max(UV_exp,axis=1), np.min(UV_exp,axis=1), 
-                 label='Exponential', color='salmon', alpha=0.3)
-    plt.fill_between(pd.Series(Ages_2.value), np.max(UV_del,axis=1), np.min(UV_del,axis=1), 
-                 label='Delayed',color='orange', alpha=0.3)
-    #plt.legend(loc=4,fontsize=12,frameon=True,facecolor='w')
+    
+    plot_setting()
 
-    plt.axhline(0.5,color='c',ls='-',lw=1,zorder=2)
-    plt.axhline(0.4,color='c',ls=':',lw=1,zorder=2)
-    plt.axhline(0.6,color='c',ls=':',lw=1,zorder=2)
-    plt.axvline(2.5,color='k',ls='--',lw=1,alpha=0.5,zorder=1)
-    plt.axvline(8.5,color='k',ls='--',lw=1,alpha=0.5,zorder=1)
-
-    plt.plot(tgs-0.18, uvs_SF, lw=2.5, ls="-.",
+    plt.plot(tgs-d, uvs_SF, lw=2.5, ls="-.",
                 c='b', alpha=.8,zorder=4)
     plt.plot(tgs, uvs, lw=2.5,ls="-.",
                 c='limegreen', alpha=.8,zorder=4)
-    plt.plot(tgs+0.18, uvs_a, lw=2.5,ls="-.",
+    plt.plot(tgs+d, uvs_a, lw=2.5,ls="-.",
                 c='orangered', alpha=.8,zorder=4)
 
-    plt.scatter(tgs-0.18, uvs_SF, s=80, linewidth=2,marker="^",
-                facecolor='b', edgecolor='k',alpha=.8,zorder=5,label="CANDELS SFG $_{pure}$")
-    plt.scatter(tgs, uvs, s=80, linewidth=2,
-                facecolor='limegreen', edgecolor='k',alpha=.8,zorder=5,label="CANDELS SFG $_{UVJ}$")
-    plt.scatter(tgs+0.18, uvs_a, s=80, linewidth=2,marker="s",
+    plt.scatter(tgs-d, uvs_SF, s=80, linewidth=2,marker="o",
+                facecolor='b', edgecolor='k',alpha=.8,zorder=7,label="CANDELS SFG (MS+UVJ)")
+    plt.scatter(tgs, uvs, s=80, linewidth=2,marker="^",
+                facecolor='limegreen', edgecolor='k',alpha=.8,zorder=6,label="CANDELS SFG (UVJ)")
+    plt.scatter(tgs+d, uvs_a, s=80, linewidth=2,marker="s",
                 facecolor='orangered', edgecolor='k',alpha=.8,zorder=5,label="CANDELS All")
 
-    plt.legend(loc=4,fontsize=12,frameon=True,facecolor='w')
+    plt.errorbar(tgs+d, uvs_a, 
+                 yerr = [uva_a,uvb_a],fmt=' ',
+                 c='orangered',alpha=0.7,capsize=5,zorder=3)
+    plt.errorbar(tgs, uvs, 
+                 yerr = [uva,uvb],fmt=' ',
+                 c='limegreen',alpha=0.7,capsize=5,zorder=3)
+    plt.errorbar(tgs-d, uvs_SF, 
+                 yerr = [uva_SF,uvb_SF],fmt=' ',
+                 c='royalblue',alpha=0.5,capsize=5,zorder=3)
 
-    plt.plot(Ages,UV_C.iloc[:,1],c='royalblue',lw=3,alpha=0.9,zorder=3)
-    plt.plot(Ages,UV_A.iloc[:,3],c='g',lw=3,alpha=0.9,zorder=3)
-    plt.plot(Ages_2,UV_exp.iloc[:,2],c='firebrick',lw=3,alpha=0.7,zorder=3)
-    plt.plot(Ages_2,UV_del.iloc[:,2],c='darkorange',lw=3,alpha=0.7,zorder=3)
-
-    plt.xlabel('T (Gyr)',fontsize=15)
     plt.ylabel('U - V',fontsize=15)
-    plt.xlim(-0.5,12.5)
-    plt.ylim(0.0,1.2)
-    plt.title("CANDELS Mean U-V Evolution",fontsize=20)
+    plt.legend(loc=4,fontsize=12,frameon=True,facecolor='w')
+    plt.text(0.2,1.12,"Median",fontsize=20,bbox=dict(facecolor='none',pad=5.0))
+    
     plt.subplot(122)
-    plt.fill_between(pd.Series(Ages.value), np.max(UV_C,axis=1), np.min(UV_C,axis=1), 
-                 label='Ciesla17', color='skyblue', alpha=0.3)
-    plt.fill_between(pd.Series(Ages.value), np.max(UV_A,axis=1), np.min(UV_A,axis=1), 
-                 label='RP17', color='lightgreen', alpha=0.3)
-    plt.fill_between(pd.Series(Ages_2.value), np.max(UV_exp,axis=1), np.min(UV_exp,axis=1), 
-                 label='Exponential', color='salmon', alpha=0.3)
-    plt.fill_between(pd.Series(Ages_2.value), np.max(UV_del,axis=1), np.min(UV_del,axis=1), 
-                 label='Delayed',color='orange', alpha=0.3)
-    #plt.legend(loc=4,fontsize=12,frameon=True,facecolor='w')
+    plot_setting()
 
-    plt.axhline(0.5,color='c',ls='-',lw=1,zorder=2)
-    plt.axhline(0.4,color='c',ls=':',lw=1,zorder=2)
-    plt.axhline(0.6,color='c',ls=':',lw=1,zorder=2)
-    plt.axvline(2.5,color='k',ls='--',lw=1,alpha=0.5,zorder=1)
-    plt.axvline(8.5,color='k',ls='--',lw=1,alpha=0.5,zorder=1)
-
-    plt.plot(tgs-0.18, uvm_SF, lw=2.5, ls="-.",
-                c='b', alpha=.8,zorder=4)
     plt.plot(tgs, uvm, lw=2.5,ls="-.",
                 c='limegreen', alpha=.8,zorder=4)
-    plt.plot(tgs+0.18, uvm_a, lw=2.5,ls="-.",
+    plt.plot(tgs+d, uvm_a, lw=2.5,ls="-.",
                 c='orangered', alpha=.8,zorder=4)
+    plt.plot(tgs-d, uvm_SF, lw=2.5, ls="-.",
+                c='royalblue', alpha=.8,zorder=4)
 
-    plt.scatter(tgs-0.18, uvm_SF, s=80, linewidth=2,marker="^",
-                facecolor='b', edgecolor='None',alpha=.8,zorder=5,label="CANDELS SFG $_{pure}$")
-    plt.scatter(tgs, uvm, s=80, linewidth=2,
-                facecolor='limegreen', edgecolor='None',alpha=.8,zorder=5,label="CANDELS SFG $_{UVJ}$")
-    plt.scatter(tgs+0.18, uvm_a, s=80, linewidth=2,marker="s",
+    plt.scatter(tgs-d, uvm_SF, s=120, linewidth=2,marker="o",
+                facecolor='royalblue', edgecolor='None',alpha=.8,zorder=7,label="CANDELS SFG (MS+UVJ)")
+    plt.scatter(tgs, uvm, s=100, linewidth=2,marker="^",
+                facecolor='limegreen', edgecolor='None',alpha=.8,zorder=6,label="CANDELS SFG (UVJ)")
+    plt.scatter(tgs+d, uvm_a, s=80, linewidth=2,marker="s",
                 facecolor='orangered', edgecolor='None',alpha=.8,zorder=5,label="CANDELS All")
-    #plt.errorbar(tgs-0.18, uvm_SF, 
-     #            yerr = [uva_SF,uvb_SF],fmt=' ',
-      #           c='b',alpha=0.5,capsize=5,zorder=3)
-    #plt.errorbar(tgs, uvm, 
-     #            yerr = [uva,uvb],fmt=' ',
-      #           c='limegreen',alpha=0.7,capsize=5,zorder=3)
-    #plt.errorbar(tgs+0.18, uvm_a, 
-     #            yerr = [uva_a,uvb_a],fmt=' ',
-      #           c='orangered',alpha=0.7,capsize=5,zorder=3)
+    
+    plt.errorbar(tgs+d, uvm_a, 
+                 yerr = 3*uv_bt_a,fmt=' ',
+                 c='orangered',alpha=0.7,elinewidth=3,zorder=3)
+    plt.errorbar(tgs, uvm, 
+                 yerr = 3*uv_bt,fmt=' ',
+                 c='limegreen',alpha=0.7,elinewidth=3,zorder=3)
+    plt.errorbar(tgs-d, uvm_SF, 
+                 yerr = 3*uv_bt_SF,fmt=' ',
+                 c='royalblue',alpha=0.7,elinewidth=3,zorder=3)
+    
     plt.legend(loc=4,fontsize=12,frameon=True,facecolor='w')
-
-    plt.plot(Ages,UV_C.iloc[:,1],c='royalblue',lw=3,alpha=0.9,zorder=3)
-    plt.plot(Ages,UV_A.iloc[:,3],c='g',lw=3,alpha=0.9,zorder=3)
-    plt.plot(Ages_2,UV_exp.iloc[:,2],c='firebrick',lw=3,alpha=0.7,zorder=3)
-    plt.plot(Ages_2,UV_del.iloc[:,2],c='darkorange',lw=3,alpha=0.7,zorder=3)
-
-    plt.xlabel('T (Gyr)',fontsize=15)
-    plt.ylabel(r'$\rm [{\ }U - V{\ }]_{RF,corr}$',fontsize=15)
-    plt.xlim(-0.5,12.5)
-    plt.ylim(0.0,1.2)
-    plt.title("CANDELS Median U-V Evolution",fontsize=20)
-plt.tight_layout()
-#plt.savefig("N/UV_Evo_all_mean+med.pdf",dpi=400)
+    plt.text(0.2,1.12,"Mean",fontsize=20,bbox=dict(facecolor='none',pad=5.0))
+    
+plt.tight_layout(w_pad=0.5)
+plt.savefig("N/UV_Evo_all_mean+med.pdf",dpi=400)
 plt.show()
 
 # =============================================================================
